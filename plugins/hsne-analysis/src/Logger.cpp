@@ -18,8 +18,8 @@ namespace Log
 
         // In debug mode, log more. When problems occur, set level to trace
 #ifdef NDEBUG
-        console_sink->set_level(spdlog::level::warn);
-        file_sink->set_level(spdlog::level::warn);
+        console_sink->set_level(spdlog::level::info);
+        file_sink->set_level(spdlog::level::info);
 #else
         console_sink->set_level(spdlog::level::debug);
         file_sink->set_level(spdlog::level::debug);
