@@ -325,8 +325,6 @@ void ViewportSequence::triggerViewportChange(const utils::ROI& roi)
     viewRectangle.setWidth(roi.viewRoiWH.x());
     viewRectangle.setHeight(roi.viewRoiWH.y());
 
-    Log::warn(fmt::format("ViewportSequence::viewRectangle {} {} {} {}", viewRectangle.left(), viewRectangle.right(), viewRectangle.top(), viewRectangle.bottom()));
-
     _viewportSharingAction.setViewROI(viewRectangle.left(), viewRectangle.right(), viewRectangle.top(), viewRectangle.bottom());
 
     emit updatedROIInSequenceView(roi);

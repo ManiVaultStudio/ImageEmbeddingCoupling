@@ -585,9 +585,6 @@ void HsneScaleAction::setROI(const utils::Vector2D layerRoiBottomLeft, const uti
     _roi.layerTopRight = layerRoiTopRight;
     _roi.viewRoiXY = viewRoiXY;
     _roi.viewRoiWH = viewRoiWH;
-
-    Log::warn(fmt::format("HsneScaleAction::setROI layer {} {} {} {}", _roi.layerBottomLeft.x(), _roi.layerBottomLeft.y(), _roi.layerTopRight.x(), _roi.layerTopRight.y()));
-    Log::warn(fmt::format("HsneScaleAction::setROI view {} {} {} {}", _roi.viewRoiXY.x(), _roi.viewRoiXY.y(), _roi.viewRoiWH.x(), _roi.viewRoiWH.y()));
 }
 
 void HsneScaleAction::setRefEmbExtends(utils::EmbeddingExtends extends) {

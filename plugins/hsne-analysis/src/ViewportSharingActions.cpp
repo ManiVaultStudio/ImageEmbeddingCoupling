@@ -49,10 +49,6 @@ ViewportSharingActions::ViewportSharingActions(QObject* parent) :
 
         QRectF viewROI = QRectF{ left, bottom, right - left, top - bottom };
 
-        Log::warn(fmt::format("ViewportSharingActions::setViewport {} {} {} {}", left, right, bottom, top));
-        Log::warn(fmt::format("ViewportSharingActions::setViewport {} {} {} {}", viewROI.left(), viewROI.right(), viewROI.top(), viewROI.bottom()));
-        Log::warn(fmt::format("ViewportSharingActions::setViewport {} {} {} {}", layerROI.left(), layerROI.right(), layerROI.top(), layerROI.bottom()));
-
         if (layerROI != _layerROI) {
             _layerROI = layerROI;
             _viewROI = viewROI;
@@ -75,8 +71,6 @@ ViewportSharingActions::ViewportSharingActions(QObject* parent) :
         selectionROI.setBottom(bottom);
         selectionROI.setTop(top);
 
-        Log::warn(fmt::format("ViewportSharingActions::setViewport {} {} {} {}", left, right, bottom, top));
-
         if (selectionROI != _selectionROI) {
             _selectionROI = selectionROI;
 
@@ -86,8 +80,6 @@ ViewportSharingActions::ViewportSharingActions(QObject* parent) :
 
             const auto viewRoiXY = QVector3D(-1.f, -1.f, 0.f);
             const auto viewRoiWH = QVector3D(0.f, 0.f, 0.f);
-
-            Log::warn(fmt::format("ViewportSharingActions::setViewport {} {} {} {}", _selectionROI.left(), _selectionROI.right(), _selectionROI.top(), _selectionROI.bottom()));
 
             emit viewportChanged(layerRoiBottomLeft, layerRoiTopRight, viewRoiXY, viewRoiWH);
         }
