@@ -1,0 +1,72 @@
+\section{Selection mapping} \label{sec:selectionMapping}
+
+Adding selection maps between the data points (image viewer) and landmark in the embedding (embedding view).
+
+\noindent
+Done in \inlinecode{HsneHierarchy::getSelectionMapsAtScale()}.\\
+
+
+\begin{algorithm}[H]
+	\DontPrintSemicolon
+	\SetAlgoLined
+	\SetKwComment{Comment}{// }{}
+	\SetKw{KwIn}{in}
+	\SetKwData{IDMap}{idMap}	
+	\SetKwData{EmbeddingHierarchy}{embeddingHierarchy}
+	\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+	\Input{scaleLevel, idMap}
+	\Output{mappingLocalToBottom, mappingBottomToLocal}
+	
+	\BlankLine
+	\For{$embID \gets 0$ \KwTo Number of points in embedding}{
+		
+		localIdOnScale $\gets$ \IDMap\!\![embID]
+		
+		globalID $\gets$ \EmbeddingHierarchy.MapToGlobal \!\!(scaleLevel, localIdOnScale)
+		
+		influencedIDs $\gets$ \EmbeddingHierarchy.MapTopDown \!\!(scaleLevel, localIdOnScale)
+		
+		\BlankLine
+		\Comment*[l]{each embID maps to (potentially) several global IDs}
+		mappingLocalToGlobal[embID] $\gets$ \{globalID, influencedIDs\}
+		
+		\BlankLine
+		\Comment*[l]{each global ID maps to all embIDs that influence it}
+		\For{globalID \KwIn mappingLocalToGlobal[embID]}{
+			mappingBottomToLocal[globalID] $\gets$ embID
+		}
+	}
+	
+	\BlankLine
+	\Comment*[l]{data structure that hold hierarchy and scale information}
+	\EmbeddingHierarchy
+	
+	\BlankLine
+	\Comment*[l]{returns global data ID}
+	\EmbeddingHierarchy.MapToGlobal \!\!(scale, localIdOnScale)
+	
+	\BlankLine
+	\Comment*[l]{returns global IDs which are influenced the most by the local IDs}
+	\EmbeddingHierarchy.MapTopDown \!\!(scale, localIdOnScale)
+	
+	\caption{Selection mapping} \label{alg:selectionMapping}
+\end{algorithm} 
+
+\inlinecode{idMap} holds pairs of (ID on scale, ID in embedding) for all points in the embedding. 
+
+\begin{algorithm}[H]
+	\DontPrintSemicolon
+	\SetAlgoLined
+	\SetKw{KwIn}{in}
+	\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+	\Input{localIDsOnCoarserScale}
+	\Output{idMap}
+	
+	\BlankLine
+	\For{$embPos \gets 0$ \KwIn localIDsOnCoarserScale.size()}{
+		
+		idMap.insert( \{ localIDsOnCoarserScale[embPos], embPos \} )
+	}
+	
+	\caption{Computing the idMap} \label{alg:idMap}
+\end{algorithm} 

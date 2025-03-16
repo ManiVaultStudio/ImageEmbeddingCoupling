@@ -1,0 +1,90 @@
+\section{ID mapping} \label{sec:idMapping}
+
+Adding id map between the data points (image viewer) and landmark in the embedding (embedding view).
+
+\subsection{Heuristic}  \label{sec:idMappingHeuristic}
+Done in \inlinecode{computeLocalIDsOnCoarserScaleHeuristic()}.
+
+\noindent
+\inlinecode{EmbeddingHierarchy.MapBottomUp()} is the reverse mapping of \inlinecode{EmbeddingHierarchy.MapTopDown()}:
+\begin{enumerate}
+	\item MapTopDown(scale, localIDOnScale) returns a list of global IDs for which localIDOnScale has the highest influence, i.e. of all landmarks on the given scale localIDOnScale has the highest influence for each of the returned global IDs.
+	\item MapBottomUp(scale, globalID) returns the local ID on the given scale which has the highest influence globalID. It might not return any ID if the heuristic used to compute the influence hierarchy \inlinecode{InfluenceHierarchy::initialize()} did not find any landmark for globalID at the given scale.
+\end{enumerate}
+
+\begin{algorithm}[H]
+	\DontPrintSemicolon
+	\SetAlgoLined
+	\SetKwComment{Comment}{// }{}
+	\SetKw{KwIn}{in}
+	\SetKwData{EmbeddingHierarchy}{embeddingHierarchy}
+	\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+	\Input{scaleLevel, imageSelectionIDs}
+	\Output{localIDsOnScale}
+	
+	\BlankLine
+	\For{imageSelectionID \KwIn imageSelectionIDs}{
+		
+		localIDsOnScale $\gets$ \EmbeddingHierarchy.MapBottomUp \!\!(scaleLevel, imageSelectionID)
+	}
+	
+	localIDsOnScale.retainUnique()
+	
+	\BlankLine
+	\Comment*[l]{data structure that hold hierarchy and scale information}
+	\EmbeddingHierarchy
+	
+	\BlankLine
+	\Comment*[l]{returns local IDs which influence the global IDs the most}
+	\EmbeddingHierarchy.MapBottomUp \!\!(scaleLevel, imageSelectionID)
+	
+	\caption{ID mapping heuristic} \label{alg:idMappingHeuristic}
+\end{algorithm} 
+
+
+\subsection{Precise}  \label{sec:idMappingPrecise}
+Done in \inlinecode{computeLocalIDsOnCoarserScale()}.
+
+Instead of using the heuristically precomputed influence hierarchy as above, here we go from the bottom (data level/global) scale upwards.
+
+\begin{algorithm}[H]
+	\DontPrintSemicolon
+	\SetAlgoLined
+	\SetKwComment{Comment}{// }{}
+	\SetKw{KwIn}{in}
+	\SetKwData{IDMap}{idMap}	
+	\SetKwData{EmbeddingHierarchy}{embeddingHierarchy}
+	\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+	\Input{scaleLevel, imageSelectionIDs, threshold}
+	\Output{localIDsOnScale}
+	
+	\BlankLine
+	localIDsOnScale $\gets$ imageSelectionIDs
+	
+	\BlankLine
+	\For{currentScaleLevel $\gets$ 0 \KwTo scaleLevel}{
+		
+		coarserScaleInfluence $\gets$ \EmbeddingHierarchy.getInfluencingLandmarksInCoarserScale \!\!(currentScaleLevel, localIDsOnScale)
+		
+		localIDsOnScale.clear()
+		
+		\BlankLine
+		\Comment*[l]{threshold the influences}
+		\For{(coarserID, influence) \KwIn coarserScaleInfluence}{
+			
+			\If{influence $>$ threshold}{
+				localIDsOnScale.append(coarserID)
+			}
+		}
+	}
+	
+	\BlankLine
+	\Comment*[l]{data structure that hold hierarchy and scale information}
+	\EmbeddingHierarchy
+	
+	\BlankLine
+	\Comment*[l]{Returns a map of local IDs on the coarser scale (currentScaleLevel + 1) and their influences on the localIDsOnScale}
+	\EmbeddingHierarchy.getInfluencingLandmarksInCoarserScale \!\!(currentScaleLevel, localIDsOnScale)
+	
+	\caption{ID mapping precise} \label{alg:idMappingPrecise}
+\end{algorithm} 

@@ -1,0 +1,18 @@
+build/
+.vs/
+flann
+HDILibflann.tgz
+aql_out.txt
+HDILib.tgz
+flann.tgz
+lz4_Debug.tgz
+lz4_Release.tgz
+
+# tex files
+*.aux
+*.fls
+*.synctex.gz
+*.fdb_latexmk
+_minted-Docu/
+*.pdf
+*.log

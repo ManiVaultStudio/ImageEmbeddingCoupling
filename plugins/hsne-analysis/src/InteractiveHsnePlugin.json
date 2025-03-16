@@ -1,0 +1,5 @@
+{
+    "name" : "Interactive HSNE",
+    "version": "1",
+    "dependencies": [ "Points", "Images", "Cluster" ]
+}

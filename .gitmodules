@@ -1,0 +1,4 @@
+[submodule "plugins/imageviewer"]
+	path = plugins/imageviewer
+	url = https://github.com/ManiVaultStudio/ImageViewerPlugin
+	branch = feature/VMV2023
