@@ -6,7 +6,7 @@ Analysis plugin for coupling views of HSNE embeddings and high dimensional image
 git clone --recurse-submodules https://github.com/ManiVaultStudio/ImageEmbeddingCoupling.git
 ```
 
-Two plugins are build: An analysis plugin that computes HSNE embeddings, and a slightly modified image viewer based on the [ManiVault image viewer]((https://github.com/ManiVaultStudio/ImageViewerPlugin/tree/feature/VMV2023)) by Thomas Kroes.
+Two plugins are build: An analysis plugin that computes HSNE embeddings, and a slightly modified image viewer based on the [ManiVault image viewer](https://github.com/ManiVaultStudio/ImageViewerPlugin/tree/feature/VMV2023) by Thomas Kroes.
 The HSNE computation performed with [HDILibSlim](https://github.com/alxvth/HDILibSlim), a slightly modified [HDILib](https://github.com/biovault/HDILib) by Nicola Pezzotti and Thomas Höllt.
 Build the project with the same generator as the ManiVault core, see instructions [here](https://github.com/ManiVaultStudio/core). Use [vcpkg](https://github.com/microsoft/vcpkg/) for other dependencies.
 
