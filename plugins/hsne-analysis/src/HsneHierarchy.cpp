@@ -18,7 +18,7 @@
 #include <limits>
 
 // set suffix strings for cache
-constexpr auto _CACHE_SUBFOLDER_ = "hsne-cache";
+constexpr auto _CACHE_SUBFOLDER_ = "roi-hsne-cache";
 constexpr auto _HIERARCHY_CACHE_EXTENSION_ = "_hierarchy.hsne";
 constexpr auto _INFLUENCE_TOPDOWN_CACHE_EXTENSION_ = "_influence-tp-hierarchy.hsne";
 constexpr auto _INFLUENCE_BUTTUP_CACHE_EXTENSION_ = "_influence-bu-hierarchy.hsne";
