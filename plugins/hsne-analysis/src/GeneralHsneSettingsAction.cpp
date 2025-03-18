@@ -48,7 +48,7 @@ GeneralHsneSettingsAction::GeneralHsneSettingsAction(HsneSettingsAction& hsneSet
     _seedAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _useMonteCarloSamplingAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
 
-    _knnTypeAction.initialize({ "ANNOY" , "HNSW", "Exact" }, "ANNOY");
+    _knnTypeAction.initialize({ "ANNOY" , "HNSW", "Exact" }, "HNSW");
     _distanceMetricAction.initialize(_knnMetrics["ANNOY"], "Euclidean");
     _perplexityAction.initialize(2, 100, 30);
     _numScalesAction.initialize(1, 10, hsneParameters.getNumScales());
