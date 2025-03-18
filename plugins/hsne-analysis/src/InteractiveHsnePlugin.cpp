@@ -55,9 +55,13 @@ InteractiveHsnePlugin::InteractiveHsnePlugin(const PluginFactory* factory) :
     _roiEmbLandmarkData(nullptr),
     _selectionAttributeData(nullptr),
     _colorImgRoiHSNE(nullptr),
+    _colorImgRoiHSNE_img(nullptr),
     _colorImgRoiHSNEprev(nullptr),
+    _colorImgRoiHSNEprev_img(nullptr),
     _colorImgRoitSNE(nullptr),
+    _colorImgRoitSNE_img(nullptr),
     _colorImgTopLevelEmb(nullptr),
+    _colorImgTopLevelEmb_img(nullptr),
     _colorScatterTopLevelEmb(nullptr),
     _colorEmbScatBasedOnTopLevelEmb(nullptr),
     _colorImgRoiHSNEBasedOnTopLevel(nullptr),
@@ -137,7 +141,7 @@ void InteractiveHsnePlugin::init()
     // Derive a dataset from the input which will mirror the embedding
     // and is used for image recoloring based on the embedding
     // Update the dataset when the gradient descent is finished
-    auto setupColorMappingDataset = [this, numPointsInput](Dataset<Points>& dataset, std::string identifier, Dataset<Points>& UI_parent) {
+    auto setupColorMappingDataset = [this, numPointsInput](Dataset<Points>& dataset, Dataset<Images>& image, std::string identifier, Dataset<Points>& UI_parent) {
         dataset = mv::data().createDataset<Points>("Points", QString::fromStdString("Recolored Img " + identifier), UI_parent);
         events().notifyDatasetAdded(dataset);
 
@@ -148,15 +152,18 @@ void InteractiveHsnePlugin::init()
         events().notifyDatasetDataChanged(dataset);
 
         // Derive image data from mirrored embedding
-        auto colorMappingImage = mv::data().createDataset<Images>("Images", QString::fromStdString(identifier + "Image"), dataset);
+        image = mv::data().createDataset<Images>("Images", QString::fromStdString(identifier + "Image"), dataset);
 
-        colorMappingImage->setType(ImageData::Type::Stack);
-        colorMappingImage->setNumberOfImages(numColorChannels);
-        colorMappingImage->setImageSize(_inputImageSize);
-        colorMappingImage->setNumberOfComponentsPerPixel(1);
+        image->setType(ImageData::Type::Stack);
+        image->setNumberOfImages(numColorChannels);
+        image->setImageSize(_inputImageSize);
+        image->setNumberOfComponentsPerPixel(1);
 
-        events().notifyDatasetAdded(colorMappingImage);
+        events().notifyDatasetAdded(image);
 
+        std::vector<std::uint8_t> imageMask(initialColorMappingData.size(), 255);
+        image->setMaskData(std::move(imageMask));
+        events().notifyDatasetDataChanged(image);
     };
 
     // Set the output dataset (embedding) size
@@ -178,7 +185,6 @@ void InteractiveHsnePlugin::init()
         events().notifyDatasetAdded(_regHsneTopLevel);
         _regHsneTopLevel->setData(initialData.data(), numPointsInput, numEmbeddingDimensions);
         events().notifyDatasetDataChanged(_regHsneTopLevel);
-
     }
     
     // Set initial top level landmark data set
@@ -274,11 +280,11 @@ void InteractiveHsnePlugin::init()
         events().notifyDatasetAdded(_topLevelEmbClusters);
 
         // set up recolored image data sets
-        setupColorMappingDataset(_colorImgRoiHSNE, "Hsne ROI", outputDataset);
-        setupColorMappingDataset(_colorImgRoiHSNEprev, "Hsne ROI (previous)", outputDataset);
-        setupColorMappingDataset(_colorImgRoiHSNEBasedOnTopLevel, "Hsne ROI (based on Top Level Emb)", outputDataset);
-        setupColorMappingDataset(_colorImgRoitSNE, "t-SNE ROI", _tSNEofROI);
-        setupColorMappingDataset(_colorImgTopLevelEmb, "Top Level Emb", _firstEmbedding);
+        setupColorMappingDataset(_colorImgRoiHSNE, _colorImgRoiHSNE_img, "Hsne ROI", outputDataset);
+        setupColorMappingDataset(_colorImgRoiHSNEprev, _colorImgRoiHSNEprev_img, "Hsne ROI (previous)", outputDataset);
+        setupColorMappingDataset(_colorImgRoiHSNEBasedOnTopLevel, _colorImgRoiHSNEBasedOnTopLevel_img, "Hsne ROI (based on Top Level Emb)", outputDataset);
+        setupColorMappingDataset(_colorImgRoitSNE, _colorImgRoitSNE_img, "t-SNE ROI", _tSNEofROI);
+        setupColorMappingDataset(_colorImgTopLevelEmb, _colorImgTopLevelEmb_img, "Top Level Emb", _firstEmbedding);
     }
 
     // set up selection locks
@@ -910,7 +916,7 @@ std::tuple<std::vector<uint32_t>, size_t> InteractiveHsnePlugin::enabledDimensio
     return { enabledDimensionsIDs, numEnabledDimensions };
 }
 
-void InteractiveHsnePlugin::setColorMapData(Dataset<Points> emb, LandmarkMap& mapEmbToImg, Dataset<Points> imgDat, Dataset<Points> scatDat, const QImage& texture, std::vector<float>& imgColors, std::vector<float>& scatterColors)
+void InteractiveHsnePlugin::setColorMapData(Dataset<Points>& emb, LandmarkMap& mapEmbToImg, Dataset<Points>& imgDat, Dataset<Images>& imgImg, Dataset<Points>& scatDat, const QImage& texture, std::vector<float>& imgColors, std::vector<float>& scatterColors)
 {
     utils::ScopedTimer colorMapTimer("InteractiveHsnePlugin::setColorMapData", Log::debug);
     Log::debug(fmt::format("InteractiveHsnePlugin::setColorMapData: from embedding {0} to image data {1}", emb->getGuiName().toStdString(), imgDat->getGuiName().toStdString()));
@@ -950,11 +956,12 @@ void InteractiveHsnePlugin::setColorMapData(Dataset<Points> emb, LandmarkMap& ma
     };
 
     // Lookup image color in texture based on embedding position
-    const uint32_t greyVal = 128;
-    const QRgb colorBg = QColor(greyVal, greyVal, greyVal).rgb();
+    constexpr float backgroundVal = std::numeric_limits<float>::max();
+    constexpr float backgroundCol = 128;
+    std::vector<std::uint8_t> imageMask(numImagePoints, 255);
 
     // fill with background color
-    std::fill(utils::exec_policy, imgColors.begin(), imgColors.end(), greyVal);
+    std::fill(utils::exec_policy, imgColors.begin(), imgColors.end(), backgroundVal);
 
     assert(mapEmbToImg.size() == numEmbPoints);
 
@@ -978,14 +985,27 @@ void InteractiveHsnePlugin::setColorMapData(Dataset<Points> emb, LandmarkMap& ma
 
     }
 
+    // populate imageMask
+    for (size_t imageID = 0; imageID < numImagePoints; imageID++) {
+        if (imgColors[imageID * numColorChannels] == backgroundVal) {
+            imageMask[imageID] = 0;
+            imgColors[imageID * numColorChannels] = backgroundCol;
+            imgColors[imageID * numColorChannels + 1u] = backgroundCol;
+            imgColors[imageID * numColorChannels + 2u] = backgroundCol;
+        }
+    }
+
     imgDat->setData(imgColors.data(), numImagePoints, numColorChannels);
     events().notifyDatasetDataChanged(imgDat);
+
+    imgImg->setMaskData(std::move(imageMask));
+    events().notifyDatasetDataChanged(imgImg);
 
     scatDat->setData(scatterColors.data(), numEmbPoints, numColorChannels);
     events().notifyDatasetDataChanged(scatDat);
 }
 
-void InteractiveHsnePlugin::setScatterColorMapData(Dataset<Points> emb, Dataset<Points> scatDat, const QImage& texture, std::vector<float>& scatterColors)
+void InteractiveHsnePlugin::setScatterColorMapData(Dataset<Points>& emb, Dataset<Points>& scatDat, const QImage& texture, std::vector<float>& scatterColors)
 {
     utils::ScopedTimer colorMapTimer("InteractiveHsnePlugin::setScatterColorMapData", Log::debug);
     Log::debug(fmt::format("InteractiveHsnePlugin::setScatterColorMapData: for embedding {0}", emb->getGuiName().toStdString()));
@@ -1084,9 +1104,10 @@ void InteractiveHsnePlugin::setColorBasedOnClusters() {
 
 void InteractiveHsnePlugin::setColorMapDataRoiHSNE() {
     std::vector<float> scatterColors;
+    Dataset<Points> emb = getOutputDataset<Points>();
 
     // Recolor image based on current embedding
-    setColorMapData(getOutputDataset<Points>(), _mappingLocalToBottom, _colorImgRoiHSNE, _colorScatterRoiHSNE, _hsneSettingsAction->getInteractiveScaleAction().getColorMapRoiEmbAction().getColorMapImage(), _imgColorsRoiHSNE, scatterColors);
+    setColorMapData(emb, _mappingLocalToBottom, _colorImgRoiHSNE, _colorImgRoiHSNE_img, _colorScatterRoiHSNE, _hsneSettingsAction->getInteractiveScaleAction().getColorMapRoiEmbAction().getColorMapImage(), _imgColorsRoiHSNE, scatterColors);
 }
 
 void InteractiveHsnePlugin::setScatterColorBasedOnTopLevel() {
@@ -1154,7 +1175,7 @@ void InteractiveHsnePlugin::setColorMapDataRoitSNE() {
     if (_tSNEofROI->getProperty("Init").toBool())
     {
         std::vector<float> scatterColors;
-        setColorMapData(_tSNEofROI, _mappingROItSNEtoImage, _colorImgRoitSNE, _colorScatterRoitSNE, _hsneSettingsAction->getInteractiveScaleAction().getColorMapRoiEmbAction().getColorMapImage(), _imgColorstSNE, scatterColors);
+        setColorMapData(_tSNEofROI, _mappingROItSNEtoImage, _colorImgRoitSNE, _colorImgRoitSNE_img, _colorScatterRoitSNE, _hsneSettingsAction->getInteractiveScaleAction().getColorMapRoiEmbAction().getColorMapImage(), _imgColorstSNE, scatterColors);
     }
 }
 
@@ -1166,7 +1187,7 @@ void InteractiveHsnePlugin::setColorMapDataTopLevelEmb() {
     {
         // set colors of ROI embedding and recolored image based on 2D
         // sets _colorImgTopLevelEmb, _colorScatterTopLevelEmb, _imgColorsTopLevelEmb, _scatterColorsTopLevelEmb
-        setColorMapData(_firstEmbedding, _topLevelEmbMapLocalToBottom, _colorImgTopLevelEmb, _colorScatterTopLevelEmb, _hsneSettingsAction->getInteractiveScaleAction().getColorMapFirstEmbAction().getColorMapImage(), _imgColorsTopLevelEmb, _scatterColorsTopLevelEmb);
+        setColorMapData(_firstEmbedding, _topLevelEmbMapLocalToBottom, _colorImgTopLevelEmb, _colorImgTopLevelEmb_img, _colorScatterTopLevelEmb, _hsneSettingsAction->getInteractiveScaleAction().getColorMapFirstEmbAction().getColorMapImage(), _imgColorsTopLevelEmb, _scatterColorsTopLevelEmb);
 
         // sets _colorImgRoiHSNE, _colorScatterRoiHSNE, _imgColorsRoiHSNE
         setColorMapDataRoiHSNE();
@@ -1186,6 +1207,13 @@ void InteractiveHsnePlugin::saveCurrentColorImageAsPrev()
 {
     _colorImgRoiHSNEprev->setData(_imgColorsRoiHSNE.data(), _colorImgRoiHSNEprev->getNumPoints(), _colorImgRoiHSNEprev->getNumDimensions());
     events().notifyDatasetDataChanged(_colorImgRoiHSNEprev);
+
+    std::vector<std::uint8_t> mask_prev; 
+    _colorImgRoiHSNE_img->getMaskData(mask_prev);
+    if (!mask_prev.empty()) {
+        _colorImgRoiHSNEprev_img->setMaskData(std::move(mask_prev));
+        events().notifyDatasetDataChanged(_colorImgRoiHSNEprev_img);
+    }
 }
 
 uint32_t InteractiveHsnePlugin::compNumHierarchyScales()

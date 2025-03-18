@@ -1,6 +1,7 @@
 #pragma once
 
 #include <AnalysisPlugin.h>
+#include <ImageData/Images.h>
 
 #include "HsneHierarchy.h"
 #include "HsneSettingsAction.h"
@@ -9,8 +10,6 @@
 #include <QVector3D>
 #include <QSize>
 
-#include <chrono>
-#include <unordered_map>
 #include <tuple>
 #include <memory>
 
@@ -85,10 +84,10 @@ public:
     void deselectAll();
 
     /** imgColors are not resized, scatterColors are resized*/
-    void setColorMapData(Dataset<Points> emb, LandmarkMap& mapEmbToImg, Dataset<Points> imgDat, Dataset<Points> scatDat, const QImage& texture, std::vector<float>& imgColors, std::vector<float>& scatterColors);
+    void setColorMapData(Dataset<Points>& emb, LandmarkMap& mapEmbToImg, Dataset<Points>& imgDat, Dataset<Images>& imgImg, Dataset<Points>& scatDat, const QImage& texture, std::vector<float>& imgColors, std::vector<float>& scatterColors);
     
     /** imgColors are not resized, scatterColors are resized*/
-    void setScatterColorMapData(Dataset<Points> emb, Dataset<Points> scatDat, const QImage& texture, std::vector<float>& scatterColors);
+    void setScatterColorMapData(Dataset<Points>& emb, Dataset<Points>& scatDat, const QImage& texture, std::vector<float>& scatterColors);
 
 private:
     /** The modified image viewer reports the current viewport 
@@ -194,13 +193,17 @@ private:
     Dataset<Points>         _roiRepresentation;         /** Roi representation dataset reference */
     Dataset<Points>         _numberTransitions;         /** Transitions number dataset reference */
     Dataset<Points>         _colorScatterRoiHSNE;       /** Color scatter dataset reference */
-    Dataset<Points>         _colorImgRoiHSNE;           /** Color image dataset reference */
+    Dataset<Points>         _colorImgRoiHSNE;           /** Color image data dataset reference */
+    Dataset<Images>         _colorImgRoiHSNE_img;       /** Color image dataset reference */
     Dataset<Points>         _colorImgRoiHSNEBasedOnTopLevel; /** Color image dataset based on top level reference */
-    Dataset<Points>         _colorImgRoiHSNEprev;       /** Previous Color image dataset reference */
+    Dataset<Images>         _colorImgRoiHSNEBasedOnTopLevel_img; /** Color image dataset data based on top level reference */
+    Dataset<Points>         _colorImgRoiHSNEprev;       /** Previous Color image data dataset reference */
+    Dataset<Images>         _colorImgRoiHSNEprev_img;   /** Previous Color image dataset reference */
     Dataset<Points>         _firstEmbedding;            /** Top scale level embedding dataset reference */
     Dataset<Points>         _regHsneTopLevel;           /** Top scale level embedding for HSNE dataset reference */
     Dataset<Points>         _topLevelLandmarkData;      /** Top scale level landmarks data dataset reference */
-    Dataset<Points>         _colorImgTopLevelEmb;       /** Color image of first top scale level embedding*/
+    Dataset<Points>         _colorImgTopLevelEmb;       /** Color image data of first top scale level embedding*/
+    Dataset<Images>         _colorImgTopLevelEmb_img;   /** Color image of first top scale level embedding*/
     Dataset<Points>         _colorScatterTopLevelEmb;   /** Color scatter of first top scale level embedding*/
     Dataset<Points>         _colorEmbScatBasedOnTopLevelEmb;   /** Recoloring of current embedding based on the recoloring of the top-level embedding */
     Dataset<Points>         _roiEmbLandmarkData;  /** Top scale level landmarks data dataset reference */
@@ -208,7 +211,8 @@ private:
     Dataset<Clusters>       _topLevelEmbClusters;       /** Selection data dataset reference */
 
     Dataset<Points>         _tSNEofROI;                 /** t-SNE of ROI dataset reference */
-    Dataset<Points>         _colorImgRoitSNE;           /** Color image dataset reference */
+    Dataset<Points>         _colorImgRoitSNE;           /** Color image data dataset reference */
+    Dataset<Images>         _colorImgRoitSNE_img;       /** Color image dataset reference */
     Dataset<Points>         _colorScatterRoitSNE;       /** Color scatter dataset reference */
     TsneAnalysis            _tsneROIAnalysis;           /** TSNE ROI analysis */
     LandmarkMap             _mappingROItSNEtoImage;     /** Maps ROI t-SNE indices to image indices. */
