@@ -2,9 +2,9 @@
 #include "HsneHierarchy.h"
 
 #include <algorithm>
-#include <numeric>
-#include <array>
+#include <cmath>
 #include <iterator>
+#include <numeric>
 
 /// ///////////////////// ///
 /// HsneScaleUpdateWorker ///
@@ -161,8 +161,10 @@ std::vector<float> HsneScaleUpdateWorker::getRoiRepresentationFractions() const
     std::vector<float> roiRepresentationFractions;
     roiRepresentationFractions.reserve(_IdRoiRepresentation.size());
 
-    for (size_t n = 0; n < _IdRoiRepresentation.size(); ++n)
-        roiRepresentationFractions.emplace_back(_IdRoiRepresentation[n].first);
+    for (size_t n = 0; n < _IdRoiRepresentation.size(); ++n) {
+        const float representedRoiSize = std::log(_IdRoiRepresentation[n].first + 1);
+        roiRepresentationFractions.push_back(std::clamp(representedRoiSize, 0.f, 10.f));
+    }
 
     return roiRepresentationFractions;
 }
