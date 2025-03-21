@@ -299,7 +299,7 @@ HsneScaleAction::HsneScaleAction(QObject* parent, InteractiveHsnePlugin* hsneAna
             }
 
             // set gradient descent iterations for updates to lower number
-            _hsneAnalysisPlugin->getHsneSettingsAction().getTsneSettingsAction().getGeneralTsneSettingsAction().getNumDefaultUpdateIterationsActionAction().setValue(500);
+            _hsneAnalysisPlugin->getHsneSettingsAction().getTsneSettingsAction().getGeneralTsneSettingsAction().getNumDefaultUpdateIterationsAction().setValue(500);
 
             emit finished();
             });

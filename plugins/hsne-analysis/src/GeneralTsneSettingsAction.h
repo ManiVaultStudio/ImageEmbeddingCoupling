@@ -41,7 +41,7 @@ public: // Action getters
     IntegralAction& getIterationsPushlishExtendAction() { return _iterationsPushlishExtendAction; };
     ToggleAction& getPublishExtendsOnceAction() { return _publishExtendsOnceAction; };
     IntegralAction& getNumNewIterationsAction() { return _numNewIterationsAction; };
-    IntegralAction& getNumDefaultUpdateIterationsActionAction() { return _numDefaultUpdateIterationsAction; };
+    IntegralAction& getNumDefaultUpdateIterationsAction() { return _numDefaultUpdateIterationsAction; };
     IntegralAction& getNumComputatedIterationsAction() { return _numComputatedIterationsAction; };
     TsneComputationAction& getComputationAction() { return _computationAction; }
 
