@@ -27,7 +27,7 @@ set(BUILD_TESTING OFF CACHE BOOL "Enable testing for Eigen" FORCE)
 set(EIGEN_BUILD_TESTING  OFF CACHE BOOL "Enable creation of Eigen tests." FORCE)
 set(EIGEN_BUILD_DOC OFF CACHE BOOL "Enable creation of Eigen documentation" FORCE)
 set(EIGEN_BUILD_DEMOS OFF CACHE BOOL "Toggles the building of the Eigen demos" FORCE)
-fetch_content_url(eigen "https://gitlab.com/libeigen/eigen/-/archive/e67c494cba7180066e73b9f6234d0b2129f1cdf5/eigen-e67c494cba7180066e73b9f6234d0b2129f1cdf5.tar.gz") # 3.4 as of 14/11/24
+fetch_content_url(eigen "https://gitlab.com/libeigen/eigen/-/archive/3866cbfbe8622f41b4f9fa17227aaa7a8de13890/eigen-3866cbfbe8622f41b4f9fa17227aaa7a8de13890.tar.gz") # master as of 26/03/25
 
 set(HDILibSlim_INSTALL OFF)
 set(HDILibSlim_ENABLE_AVX ${IHP_USE_AVX})
