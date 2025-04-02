@@ -23,34 +23,49 @@ if(UNIX AND NOT APPLE)
    find_package(TBB REQUIRED)
 endif()
 
-set(BUILD_TESTING OFF CACHE BOOL "Enable testing for Eigen" FORCE)
-set(EIGEN_BUILD_TESTING  OFF CACHE BOOL "Enable creation of Eigen tests." FORCE)
-set(EIGEN_BUILD_DOC OFF CACHE BOOL "Enable creation of Eigen documentation" FORCE)
-set(EIGEN_BUILD_DEMOS OFF CACHE BOOL "Toggles the building of the Eigen demos" FORCE)
-fetch_content_url(eigen "https://gitlab.com/libeigen/eigen/-/archive/3866cbfbe8622f41b4f9fa17227aaa7a8de13890/eigen-3866cbfbe8622f41b4f9fa17227aaa7a8de13890.tar.gz") # master as of 26/03/25
+if(NOT eigen_SOURCE_DIR)
+    set(BUILD_TESTING OFF CACHE BOOL "Enable testing for Eigen" FORCE)
+    set(EIGEN_BUILD_TESTING  OFF CACHE BOOL "Enable creation of Eigen tests." FORCE)
+    set(EIGEN_BUILD_DOC OFF CACHE BOOL "Enable creation of Eigen documentation" FORCE)
+    set(EIGEN_BUILD_DEMOS OFF CACHE BOOL "Toggles the building of the Eigen demos" FORCE)
+    fetch_content_url(eigen "https://gitlab.com/libeigen/eigen/-/archive/3866cbfbe8622f41b4f9fa17227aaa7a8de13890/eigen-3866cbfbe8622f41b4f9fa17227aaa7a8de13890.tar.gz") # master as of 26/03/25
+endif()
 
-set(HDILibSlim_INSTALL OFF)
-set(HDILibSlim_ENABLE_AVX ${IHP_USE_AVX})
-set(HDILibSlim_ENABLE_PID ON)
-set(HDILibSlim_OPTIMIZATION_LEVEL ${IHP_OPTIMIZATION_LEVEL})
+if(TARGET hdislimdimensionalityreduction AND TARGET hdislimutils AND TARGET hdislimdata)
+    if(NOT HDILibSlim_LINK_LIBS)
+        set(HDILibSlim_LINK_LIBS hdislimdimensionalityreduction hdislimutils hdislimdata)
+    endif()
+    
+    if(NOT HDILibSlim_INCLUDE_DIR AND HDILibSlim_SOURCE_DIR)
+        set(HDILibSlim_INCLUDE_DIR ${HDILibSlim_SOURCE_DIR})
+    endif()
+else()
+    set(HDILibSlim_INSTALL OFF)
+    set(HDILibSlim_ENABLE_AVX ${IHP_USE_AVX})
+    set(HDILibSlim_ENABLE_PID ON)
+    set(HDILibSlim_OPTIMIZATION_LEVEL ${IHP_OPTIMIZATION_LEVEL})
 
-CPMAddPackage(
- NAME              HDILibSlim
- GIT_REPOSITORY    https://github.com/alxvth/HDILibSlim.git
- GIT_TAG           0d3c20098cc616fd18b80ddfda68aac593d1d604
- EXCLUDE_FROM_ALL  YES
- OPTIONS "HDILibSlim_INSTALL ${HDILibSlim_INSTALL}"
-         "HDILibSlim_ENABLE_AVX ${HDILibSlim_ENABLE_AVX}"
-         "HDILibSlim_ENABLE_PID ${HDILibSlim_ENABLE_PID}"
-         "HDILibSlim_OPTIMIZATION_LEVEL ${HDILibSlim_OPTIMIZATION_LEVEL}"
-)
+    CPMAddPackage(
+     NAME              HDILibSlim
+     GIT_REPOSITORY    https://github.com/alxvth/HDILibSlim.git
+     GIT_TAG           8eb510528dc4169079fa97cb324c13b54d060ec4
+     EXCLUDE_FROM_ALL  YES
+     OPTIONS "HDILibSlim_INSTALL ${HDILibSlim_INSTALL}"
+             "HDILibSlim_ENABLE_AVX ${HDILibSlim_ENABLE_AVX}"
+             "HDILibSlim_ENABLE_PID ${HDILibSlim_ENABLE_PID}"
+             "HDILibSlim_OPTIMIZATION_LEVEL ${HDILibSlim_OPTIMIZATION_LEVEL}"
+    )
 
-message(STATUS "HDILibSlim_SOURCE_DIR: ${HDILibSlim_SOURCE_DIR}")
+    set(HDILibSlim_INCLUDE_DIR ${HDILibSlim_SOURCE_DIR})
+    set(HDILibSlim_LINK_LIBS hdislimdimensionalityreduction hdislimutils hdislimdata)
 
-set_target_properties(hdislimdata hdislimdimensionalityreduction hdislimutils
-    PROPERTIES 
-    FOLDER HDILibSlim
-)
+    message(STATUS "HDILibSlim_SOURCE_DIR: ${HDILibSlim_SOURCE_DIR}")
+
+    set_target_properties(hdislimdata hdislimdimensionalityreduction hdislimutils
+        PROPERTIES 
+        FOLDER HDILibSlim
+    )
+endif()
 
 if (APPLE)
     target_compile_definitions(hdislimdimensionalityreduction PRIVATE -DGL_SILENCE_DEPRECATION)
