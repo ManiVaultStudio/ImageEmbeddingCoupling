@@ -23,12 +23,15 @@ if(UNIX AND NOT APPLE)
    find_package(TBB REQUIRED)
 endif()
 
-if(NOT eigen_SOURCE_DIR)
+find_package(Eigen3 CONFIG)
+if(NOT eigen_SOURCE_DIR AND NOT TARGET Eigen3::Eigen AND NOT Eigen3_FOUND)
     set(BUILD_TESTING OFF CACHE BOOL "Enable testing for Eigen" FORCE)
     set(EIGEN_BUILD_TESTING  OFF CACHE BOOL "Enable creation of Eigen tests." FORCE)
     set(EIGEN_BUILD_DOC OFF CACHE BOOL "Enable creation of Eigen documentation" FORCE)
     set(EIGEN_BUILD_DEMOS OFF CACHE BOOL "Toggles the building of the Eigen demos" FORCE)
-    fetch_content_url(eigen "https://gitlab.com/libeigen/eigen/-/archive/3866cbfbe8622f41b4f9fa17227aaa7a8de13890/eigen-3866cbfbe8622f41b4f9fa17227aaa7a8de13890.tar.gz") # master as of 26/03/25
+    fetch_content_url(eigen "https://gitlab.com/libeigen/eigen/-/archive/5.0.1.tar.gz")
+else()
+    message(STATUS "InteractiveHsnePlugin: Use external Eigen")
 endif()
 
 if(TARGET hdislimdimensionalityreduction AND TARGET hdislimutils AND TARGET hdislimdata)
@@ -48,7 +51,7 @@ else()
     CPMAddPackage(
      NAME              HDILibSlim
      GIT_REPOSITORY    https://github.com/alxvth/HDILibSlim.git
-     GIT_TAG           8eb510528dc4169079fa97cb324c13b54d060ec4
+     GIT_TAG           fcc1624eb6db5a704f33582f26bcddc1ef1773f7
      EXCLUDE_FROM_ALL  YES
      OPTIONS "HDILibSlim_INSTALL ${HDILibSlim_INSTALL}"
              "HDILibSlim_ENABLE_AVX ${HDILibSlim_ENABLE_AVX}"
@@ -213,7 +216,6 @@ set_target_properties(${IHP_PLUGIN} PROPERTIES DEBUG_POSTFIX "d")
 target_include_directories(${IHP_PLUGIN} PRIVATE "${ManiVault_INCLUDE_DIR}")
 
 target_include_directories(${IHP_PLUGIN} PUBLIC  "${HDILibSlim_SOURCE_DIR}")
-target_include_directories(${IHP_PLUGIN} PUBLIC  "${eigen_SOURCE_DIR}")
 
 # -----------------------------------------------------------------------------
 # Target library linking
@@ -222,10 +224,10 @@ target_link_libraries(${IHP_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${IHP_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 
 target_link_libraries(${IHP_PLUGIN} PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(${IHP_PLUGIN} PRIVATE Eigen3::Eigen)
 target_link_libraries(${IHP_PLUGIN} PRIVATE spdlog::spdlog_header_only)
 target_link_libraries(${IHP_PLUGIN} PRIVATE hdislimdimensionalityreduction hdislimutils hdislimdata ${CMAKE_DL_LIBS})
 target_link_libraries(${IHP_PLUGIN} PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(${IHP_PLUGIN} PUBLIC Eigen3::Eigen)
 
 target_link_libraries(${IHP_PLUGIN} PRIVATE ManiVault::Core)
 target_link_libraries(${IHP_PLUGIN} PRIVATE ManiVault::PointData)
