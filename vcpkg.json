@@ -1,16 +1,15 @@
 {
-    "name": "interactive-hsne-plugins",
-    "version": "0.0.1",
-    "dependencies": [
-      "nlohmann-json",
-      "spdlog",
-      "catch2"
-    ],
-  }
-    "builtin-baseline":"4110d43398232f486c3fd0b74e2dc9e4ca5e2a59",
-    "overrides": [
-      { "name": "nlohmann-json", "version": "3.11.3#1" },
-      { "name": "spdlog", "version": "1.15.1#0" },
-      { "name": "catch2", "version": "3.8.0#0" }
-    ]
-  }
+  "name": "interactive-hsne-plugins",
+  "version": "0.0.1",
+  "dependencies": [
+    "nlohmann-json",
+    "spdlog",
+    "catch2"
+  ],
+  "builtin-baseline":"b42b19a62b63514ed9fa2a81e07ce75e613c83c0",
+  "overrides": [
+    { "name": "nlohmann-json", "version": "3.12.0#2" },
+    { "name": "spdlog", "version": "1.17.0#0" },
+    { "name": "catch2", "version": "3.12.0#0" }
+  ]
+}
